@@ -37,6 +37,7 @@
         <module>langchain4j-nomic</module>
         <module>langchain4j-ollama</module>
         <module>langchain4j-onnx-scoring</module>
+        <module>langchain4j-onnx-genai</module>
         <module>langchain4j-ovh-ai</module>
         <module>langchain4j-open-ai</module>
         <module>langchain4j-open-ai-official</module>
@@ -152,6 +153,34 @@
                             <goal>lint</goal>
                         </goals>
                         <phase>process-classes</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>download-test-model</id>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <phase>process-test-resources</phase>
+                        <configuration>
+                            <target>
+                                <!-- Create directories
+                                <mkdir dir="${project.build.directory}/test-models/tiny-llama-onnx"></mkdir>
+                                <mkdir dir="${project.build.directory}/test-models/tiny-llama-onnx/tokenizer"></mkdir>
+                                 -->
+
+                                <!-- Download model files from SmolLM2-1.7B-Instruct (public repo)
+                                <get dest="${project.build.directory}/test-models/tiny-llama-onnx/model.onnx" src="https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct/blob/main/onnx/model_q4f16.onnx" usetimestamp="true" verbose="true"></get>
+                                <get dest="${project.build.directory}/test-models/tiny-llama-onnx/genai_config.json" src="https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct/blob/main/config.json" usetimestamp="true" verbose="true"></get>
+                                <get dest="${project.build.directory}/test-models/tiny-llama-onnx/tokenizer/tokenizer.json" src="https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct/blob/main/tokenizer.json" usetimestamp="true" verbose="true"></get>
+                                <get dest="${project.build.directory}/test-models/tiny-llama-onnx/tokenizer/tokenizer_config.json" src="https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct/blob/main/tokenizer_config.json" usetimestamp="true" verbose="true"></get>
+                                 -->
+                            </target>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
