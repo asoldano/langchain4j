@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 public class OnnxGenaiChatModelIT {
 
     private static final Logger logger = LoggerFactory.getLogger(OnnxGenaiChatModelIT.class);
-    private static final String TEST_MODEL_DIR = "target/test-classes/SmolLM_135M_int4";
+    private static final String TEST_MODEL_DIR = "target/test-classes/SmolLM_135M_INT4";
     private static OnnxGenaiChatModel model;
 
     @BeforeAll

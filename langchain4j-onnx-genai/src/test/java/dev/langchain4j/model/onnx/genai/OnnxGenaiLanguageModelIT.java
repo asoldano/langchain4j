@@ -2,8 +2,9 @@ package dev.langchain4j.model.onnx.genai;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import dev.langchain4j.model.language.LanguageModel;
+import ai.onnxruntime.OrtEnvironment;
 import dev.langchain4j.model.output.Response;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -14,18 +15,32 @@ import org.slf4j.LoggerFactory;
 public class OnnxGenaiLanguageModelIT {
 
     private static final Logger logger = LoggerFactory.getLogger(OnnxGenaiLanguageModelIT.class);
-    private static final String TEST_MODEL_DIR = "target/test-classes/SmolLM_135M_int4";
+    private static final String TEST_MODEL_DIR = "target/test-classes/SmolLM_135M_INT4";
     private static OnnxGenaiLanguageModel model;
 
     @BeforeAll
     static void setUp() {
         try {
+            System.out.println("ONNX Runtime version: " + OrtEnvironment.getEnvironment());
+
             // Create model with default parameters
             model = OnnxGenaiLanguageModel.withDefaultParameters(TEST_MODEL_DIR);
             logger.info("Initialized test model from {}", TEST_MODEL_DIR);
         } catch (Exception e) {
             logger.error("Failed to initialize test model", e);
             throw new RuntimeException("Failed to initialize test model", e);
+        }
+    }
+
+    @AfterAll
+    static void tearDown() {
+        if (model != null) {
+            try {
+                model.close();
+                logger.info("Closed test model");
+            } catch (Exception e) {
+                logger.error("Failed to close test model", e);
+            }
         }
     }
 
@@ -56,41 +71,72 @@ public class OnnxGenaiLanguageModelIT {
                 .doSample(true)
                 .build();
 
-        LanguageModel customModel = OnnxGenaiLanguageModel.builder()
+        try (OnnxGenaiLanguageModel customModel = OnnxGenaiLanguageModel.builder()
                 .modelPath(TEST_MODEL_DIR)
                 .parameters(customParams)
-                .build();
+                .build()) {
 
-        String prompt = "Write a short poem about artificial intelligence.";
+            String prompt = "Write a short poem about artificial intelligence.";
 
-        // When
-        Response<String> response = customModel.generate(prompt);
+            // When
+            Response<String> response = customModel.generate(prompt);
 
-        // Then
-        assertThat(response).isNotNull();
-        assertThat(response.content()).isNotEmpty();
-        logger.info("Model response with custom parameters: {}", response.content());
+            // Then
+            assertThat(response).isNotNull();
+            assertThat(response.content()).isNotEmpty();
+            logger.info("Model response with custom parameters: {}", response.content());
+        }
     }
 
     @Test
     void should_build_model_with_builder() {
         // Given
-        OnnxGenaiParameters params =
-                OnnxGenaiParameters.builder().maxTokens(30).temperature(0.8f).build();
-
+        /* OnnxGenaiParameters params =
+                       OnnxGenaiParameters.builder().maxTokens(30).temperature(0.8f).build();
+        */
         // When
-        LanguageModel builtModel = OnnxGenaiLanguageModel.builder()
+        try (OnnxGenaiLanguageModel builtModel = OnnxGenaiLanguageModel.builder()
                 .modelPath(TEST_MODEL_DIR)
-                .parameters(params)
-                .build();
+                .parameters(OnnxGenaiParameters.builder()
+                        .maxTokens(30)
+                        .temperature(0.8f)
+                        .build())
+                .build()) {
 
-        // Then
-        assertThat(builtModel).isNotNull();
+            // Then
+            assertThat(builtModel).isNotNull();
 
-        // Test the built model
-        Response<String> response = builtModel.generate("What is 2+2?");
-        assertThat(response).isNotNull();
-        assertThat(response.content()).isNotEmpty();
-        logger.info("Built model response: {}", response.content());
+            // Test the built model
+            Response<String> response = builtModel.generate("What is 2+2?");
+            assertThat(response).isNotNull();
+            assertThat(response.content()).isNotEmpty();
+            logger.info("Built model response: {}", response.content());
+        }
     }
+
+    /*@Test
+    void mioTest() {
+        try {
+            // 1. Costruzione del modello ONNX GenAI
+            OnnxGenaiLanguageModel model = OnnxGenaiLanguageModel.builder()
+                    .modelPath(TEST_MODEL_DIR) // path a modello + tokenizer
+                    // .maxNewTokens(50)
+                    // .temperature(0.7)
+                    // .topP(0.9)
+                    .build();
+
+            // 2. Prompt di input
+            String prompt = "Hello, how are you today?";
+
+            // 3. Generazione del testo
+            Response<String> result = model.generate(prompt);
+
+            System.out.println("✅ Risultato generato:");
+            System.out.println(result.content());
+
+        } catch (Exception e) {
+            System.err.println("❌ Errore durante la generazione:");
+            e.printStackTrace();
+        }
+    } */
 }

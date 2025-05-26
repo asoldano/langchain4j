@@ -72,7 +72,7 @@ public class OnnxGenaiChatModel implements ChatModel {
             String prompt = promptTemplate.format(chatRequest.messages());
 
             // Convert LangChain4j parameters to GenAI parameters via SimpleGenAI
-            GeneratorParams params = simpleGenAI.createGeneratorParams(prompt);
+            GeneratorParams params = simpleGenAI.createGeneratorParams();
 
             // Apply parameters from the provider
             applyParameters(params, parametersProvider);
@@ -81,7 +81,7 @@ public class OnnxGenaiChatModel implements ChatModel {
             AtomicReference<StringBuilder> responseBuilder = new AtomicReference<>(new StringBuilder());
             Consumer<String> tokenListener = token -> responseBuilder.get().append(token);
 
-            String response = simpleGenAI.generate(params, tokenListener);
+            String response = simpleGenAI.generate(params, prompt, tokenListener);
 
             return ChatResponse.builder().aiMessage(AiMessage.from(response)).build();
         } catch (GenAIException e) {

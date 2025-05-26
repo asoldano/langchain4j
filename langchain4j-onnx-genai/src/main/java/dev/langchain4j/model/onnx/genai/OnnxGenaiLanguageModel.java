@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * An implementation of {@link LanguageModel} that uses ONNX Runtime GenAI for inference.
  * This implementation uses the SimpleGenAI class from the ONNX Runtime GenAI library.
  */
-public class OnnxGenaiLanguageModel implements LanguageModel {
+public class OnnxGenaiLanguageModel implements LanguageModel, AutoCloseable {
 
     private static final Logger logger = LoggerFactory.getLogger(OnnxGenaiLanguageModel.class);
 
@@ -62,7 +62,7 @@ public class OnnxGenaiLanguageModel implements LanguageModel {
     public Response<String> generate(String prompt) {
         try {
             // Convert LangChain4j parameters to GenAI parameters via SimpleGenAI
-            GeneratorParams params = simpleGenAI.createGeneratorParams(prompt);
+            GeneratorParams params = simpleGenAI.createGeneratorParams();
 
             // Apply parameters from the provider
             applyParameters(params, parametersProvider);
@@ -71,7 +71,7 @@ public class OnnxGenaiLanguageModel implements LanguageModel {
             AtomicReference<StringBuilder> responseBuilder = new AtomicReference<>(new StringBuilder());
             Consumer<String> tokenListener = token -> responseBuilder.get().append(token);
 
-            String response = simpleGenAI.generate(params, tokenListener);
+            String response = simpleGenAI.generate(params, prompt, tokenListener);
 
             return Response.from(response);
         } catch (GenAIException e) {
@@ -113,6 +113,11 @@ public class OnnxGenaiLanguageModel implements LanguageModel {
         } catch (GenAIException e) {
             logger.warn("Failed to apply some generation parameters", e);
         }
+    }
+
+    @Override
+    public void close() {
+        simpleGenAI.close();
     }
 
     /**
