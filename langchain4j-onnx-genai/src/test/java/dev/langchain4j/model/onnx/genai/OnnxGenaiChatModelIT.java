@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
-import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import java.util.List;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -31,6 +31,18 @@ public class OnnxGenaiChatModelIT {
         } catch (Exception e) {
             logger.error("Failed to initialize test model", e);
             throw new RuntimeException("Failed to initialize test model", e);
+        }
+    }
+
+    @AfterAll
+    static void tearDown() {
+        if (model != null) {
+            try {
+                model.close();
+                logger.info("Closed test model");
+            } catch (Exception e) {
+                logger.error("Failed to close test model", e);
+            }
         }
     }
 
@@ -58,27 +70,28 @@ public class OnnxGenaiChatModelIT {
         OnnxGenaiPromptTemplate customTemplate =
                 new OnnxGenaiPromptTemplate("### System:\n", "### Human:\n", "### AI:\n", "", "", "\n");
 
-        ChatModel customModel = OnnxGenaiChatModel.builder()
+        try (OnnxGenaiChatModel customModel = OnnxGenaiChatModel.builder()
                 .modelPath(TEST_MODEL_DIR)
                 .parameters(OnnxGenaiParameters.builder().build())
                 .promptTemplate(customTemplate)
-                .build();
+                .build()) {
+            ChatRequest request = ChatRequest.builder()
+                    .messages(
+                            SystemMessage.from("Be concise and helpful. Possibly answer with just a single sentence."),
+                            UserMessage.from("How do you say 'weather' in Italian?"))
+                    .build();
 
-        ChatRequest request = ChatRequest.builder()
-                .messages(
-                        SystemMessage.from("Be concise and helpful. Possibly answer with just a single sentence."),
-                        UserMessage.from("How do you say 'weather' in Italian?"))
-                .build();
+            // When
+            ChatResponse response = customModel.chat(request);
 
-        // When
-        ChatResponse response = customModel.chat(request);
-
-        // Then
-        assertThat(response.aiMessage()).isNotNull();
-        assertThat(response.aiMessage().text()).isNotEmpty();
-        // Note: We can't assert exact text since it depends on the model's response
-        logger.info(
-                "Model response with custom template: {}", response.aiMessage().text());
+            // Then
+            assertThat(response.aiMessage()).isNotNull();
+            assertThat(response.aiMessage().text()).isNotEmpty();
+            // Note: We can't assert exact text since it depends on the model's response
+            logger.info(
+                    "Model response with custom template: {}",
+                    response.aiMessage().text());
+        }
     }
 
     @Test
@@ -93,23 +106,23 @@ public class OnnxGenaiChatModelIT {
                 .doSample(true)
                 .build();
 
-        ChatModel customModel = OnnxGenaiChatModel.builder()
+        try (OnnxGenaiChatModel customModel = OnnxGenaiChatModel.builder()
                 .modelPath(TEST_MODEL_DIR)
                 .parameters(customParams)
-                .build();
+                .build(); ) {
+            List<ChatMessage> messages = List.of(
+                    SystemMessage.from("You are a helpful assistant."),
+                    UserMessage.from("Tell me a short story about a robot."));
 
-        List<ChatMessage> messages = List.of(
-                SystemMessage.from("You are a helpful assistant."),
-                UserMessage.from("Tell me a short story about a robot."));
+            // When
+            ChatResponse response = customModel.chat(messages);
 
-        // When
-        ChatResponse response = customModel.chat(messages);
-
-        // Then
-        assertThat(response.aiMessage()).isNotNull();
-        assertThat(response.aiMessage().text()).isNotEmpty();
-        logger.info(
-                "Model response with custom parameters: {}",
-                response.aiMessage().text());
+            // Then
+            assertThat(response.aiMessage()).isNotNull();
+            assertThat(response.aiMessage().text()).isNotEmpty();
+            logger.info(
+                    "Model response with custom parameters: {}",
+                    response.aiMessage().text());
+        }
     }
 }

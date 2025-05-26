@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * An implementation of {@link ChatModel} that uses ONNX Runtime GenAI for inference.
  * This implementation uses the SimpleGenAI class from the ONNX Runtime GenAI library.
  */
-public class OnnxGenaiChatModel implements ChatModel {
+public class OnnxGenaiChatModel implements ChatModel, AutoCloseable {
 
     private static final Logger logger = LoggerFactory.getLogger(OnnxGenaiChatModel.class);
 
@@ -68,12 +68,9 @@ public class OnnxGenaiChatModel implements ChatModel {
 
     @Override
     public ChatResponse doChat(ChatRequest chatRequest) {
-        try {
+        // Convert LangChain4j parameters to GenAI parameters via SimpleGenAI
+        try (GeneratorParams params = simpleGenAI.createGeneratorParams()) {
             String prompt = promptTemplate.format(chatRequest.messages());
-
-            // Convert LangChain4j parameters to GenAI parameters via SimpleGenAI
-            GeneratorParams params = simpleGenAI.createGeneratorParams();
-
             // Apply parameters from the provider
             applyParameters(params, parametersProvider);
 
@@ -181,5 +178,10 @@ public class OnnxGenaiChatModel implements ChatModel {
                 throw new OnnxGenaiException("Failed to create SimpleGenAI instance", e);
             }
         }
+    }
+
+    @Override
+    public void close() {
+        simpleGenAI.close();
     }
 }

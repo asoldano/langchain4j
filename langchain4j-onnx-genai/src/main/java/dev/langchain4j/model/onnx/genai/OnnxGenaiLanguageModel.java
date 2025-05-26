@@ -60,10 +60,8 @@ public class OnnxGenaiLanguageModel implements LanguageModel, AutoCloseable {
 
     @Override
     public Response<String> generate(String prompt) {
-        try {
-            // Convert LangChain4j parameters to GenAI parameters via SimpleGenAI
-            GeneratorParams params = simpleGenAI.createGeneratorParams();
-
+        // Convert LangChain4j parameters to GenAI parameters via SimpleGenAI
+        try (GeneratorParams params = simpleGenAI.createGeneratorParams()) {
             // Apply parameters from the provider
             applyParameters(params, parametersProvider);
 
@@ -117,6 +115,7 @@ public class OnnxGenaiLanguageModel implements LanguageModel, AutoCloseable {
 
     @Override
     public void close() {
+
         simpleGenAI.close();
     }
 

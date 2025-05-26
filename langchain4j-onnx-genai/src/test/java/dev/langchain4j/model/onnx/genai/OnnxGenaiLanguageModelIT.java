@@ -91,16 +91,13 @@ public class OnnxGenaiLanguageModelIT {
     @Test
     void should_build_model_with_builder() {
         // Given
-        /* OnnxGenaiParameters params =
-                       OnnxGenaiParameters.builder().maxTokens(30).temperature(0.8f).build();
-        */
+        OnnxGenaiParameters params =
+                OnnxGenaiParameters.builder().maxTokens(30).temperature(0.8f).build();
+
         // When
         try (OnnxGenaiLanguageModel builtModel = OnnxGenaiLanguageModel.builder()
                 .modelPath(TEST_MODEL_DIR)
-                .parameters(OnnxGenaiParameters.builder()
-                        .maxTokens(30)
-                        .temperature(0.8f)
-                        .build())
+                .parameters(params)
                 .build()) {
 
             // Then
@@ -113,30 +110,4 @@ public class OnnxGenaiLanguageModelIT {
             logger.info("Built model response: {}", response.content());
         }
     }
-
-    /*@Test
-    void mioTest() {
-        try {
-            // 1. Costruzione del modello ONNX GenAI
-            OnnxGenaiLanguageModel model = OnnxGenaiLanguageModel.builder()
-                    .modelPath(TEST_MODEL_DIR) // path a modello + tokenizer
-                    // .maxNewTokens(50)
-                    // .temperature(0.7)
-                    // .topP(0.9)
-                    .build();
-
-            // 2. Prompt di input
-            String prompt = "Hello, how are you today?";
-
-            // 3. Generazione del testo
-            Response<String> result = model.generate(prompt);
-
-            System.out.println("✅ Risultato generato:");
-            System.out.println(result.content());
-
-        } catch (Exception e) {
-            System.err.println("❌ Errore durante la generazione:");
-            e.printStackTrace();
-        }
-    } */
 }
