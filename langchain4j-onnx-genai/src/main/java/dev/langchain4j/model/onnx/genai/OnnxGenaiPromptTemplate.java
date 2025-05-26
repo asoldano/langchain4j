@@ -3,7 +3,7 @@ package dev.langchain4j.model.onnx.genai;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.SystemMessage;
-import dev.langchain4j.service.UserMessage;
+import dev.langchain4j.data.message.UserMessage;
 import java.util.List;
 import java.util.Objects;
 
@@ -50,7 +50,8 @@ public class OnnxGenaiPromptTemplate {
      * @return A new prompt template with default formatting
      */
     public static OnnxGenaiPromptTemplate defaultTemplate() {
-        return new OnnxGenaiPromptTemplate("System: ", "User: ", "Assistant: ", "", "", "\n");
+        return llamaTemplate();
+        // return new OnnxGenaiPromptTemplate("System: ", "User: ", "Assistant: ", "", "", "\n");
     }
 
     /**
@@ -82,11 +83,12 @@ public class OnnxGenaiPromptTemplate {
             }
 
             if (message instanceof SystemMessage) {
-                prompt.append(systemPrefix).append(((SystemMessage) message).text());
-                //                        .append(userSuffix);
+                prompt.append(systemPrefix)
+                        .append(((SystemMessage) message).text())
+                        .append(userSuffix);
             } else if (message instanceof UserMessage) {
                 prompt.append(userPrefix)
-                        .append(((UserMessage) message).value())
+                        .append(((UserMessage) message).singleText())
                         .append(userSuffix);
             } else if (message instanceof AiMessage) {
                 prompt.append(aiPrefix).append(((AiMessage) message).text()).append(aiSuffix);
