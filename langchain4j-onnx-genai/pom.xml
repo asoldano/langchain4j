@@ -14,6 +14,7 @@
 
     <properties>
         <onnxruntime-genai.version>0.7.1</onnxruntime-genai.version>
+        <onnxruntime.version>1.21.0</onnxruntime.version>
     </properties>
 
     <dependencies>
@@ -40,7 +41,7 @@
         <dependency>
             <groupId>com.microsoft.onnxruntime</groupId>
             <artifactId>onnxruntime</artifactId>
-            <version>1.21.0</version>
+            <version>${onnxruntime.version}</version>
         </dependency>
 
         <!-- Logging -->
@@ -76,15 +77,68 @@
                 <version>3.0.0-M5</version>
                 <configuration>
                     <systemPropertyVariables>
-                        <onnxruntime-genai.native.path>${project.basedir}/lib</onnxruntime-genai.native.path>
+                        <onnxruntime-genai.native.path>${project.build.directory}/lib-native</onnxruntime-genai.native.path>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
-            <!-- Download test model from Hugging Face -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
+                <dependencies>
+                    <!-- Required for untar task -->
+                    <dependency>
+                        <groupId>org.apache.ant</groupId>
+                        <artifactId>ant-compress</artifactId>
+                        <version>1.5</version>
+                    </dependency>
+                </dependencies>
                 <executions>
+                    <execution>
+                        <id>download-and-extract-native-libs</id>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <target>
+                                <echo message="OS Name: ${os.name}, OS Arch: ${os.arch}"></echo>
+
+                                <!-- Define variables for download URLs and destination -->
+                                <property name="onnxruntime-genai.native.url" value="https://github.com/microsoft/onnxruntime-genai/releases/download/v${onnxruntime-genai.version}/onnxruntime-genai-${onnxruntime-genai.version}-linux-x64.tar.gz"></property>
+                                <property name="onnxruntime.native.url" value="https://github.com/microsoft/onnxruntime/releases/download/v${onnxruntime.version}/onnxruntime-linux-x64-${onnxruntime.version}.tgz"></property>
+                                <!-- Using the CPU version for Linux x64 -->
+                                <property name="native.libs.dir" value="${project.build.directory}/lib-native"></property>
+                                <property name="download.dir" value="${project.build.directory}/download"></property>
+
+                                <!-- Create necessary directories -->
+                                <mkdir dir="${native.libs.dir}"></mkdir>
+                                <mkdir dir="${download.dir}"></mkdir>
+
+                                <!-- Download ONNX Runtime GenAI native libraries -->
+                                <get dest="${download.dir}/onnxruntime-genai-native.tar.gz" src="${onnxruntime-genai.native.url}" usetimestamp="true" verbose="true"></get>
+                                <!-- Download ONNX Runtime native libraries (adjust URL if needed) -->
+                                <get dest="${download.dir}/onnxruntime-native.tar.gz" src="${onnxruntime.native.url}" usetimestamp="true" verbose="true"></get>
+
+                                <!-- Extract ONNX Runtime GenAI native libraries -->
+                                <untar compression="gzip" dest="${native.libs.dir}" src="${download.dir}/onnxruntime-genai-native.tar.gz">
+                                    <patternset>
+                                        <include name="onnxruntime-genai-${onnxruntime-genai.version}-linux-x64/lib/libonnxruntime-genai.so"></include>
+                                    </patternset>
+                                    <mapper type="flatten"></mapper>
+                                </untar>
+                                <!-- Extract ONNX Runtime native libraries and rename libonnxruntime.so.${onnxruntime.version} to libonnxruntime.so -->
+                                <untar compression="gzip" dest="${native.libs.dir}" src="${download.dir}/onnxruntime-native.tar.gz">
+                                    <patternset>
+                                        <include name="onnxruntime-linux-x64-${onnxruntime.version}/lib/libonnxruntime.so.${onnxruntime.version}"></include>
+                                    </patternset>
+                                    <mapper from="onnxruntime-linux-x64-${onnxruntime.version}/lib/libonnxruntime.so.${onnxruntime.version}" to="libonnxruntime.so" type="glob"></mapper>
+                                </untar>
+
+                                <!-- Copy libonnxruntime-genai-jni.so from local lib directory -->
+                                <copy file="${project.basedir}/lib/libonnxruntime-genai-jni.so" todir="${native.libs.dir}"></copy>
+                            </target>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>download-test-model</id>
                         <goals>
@@ -117,7 +171,7 @@
                 <version>3.0.0-M5</version>
                 <configuration>
                     <systemPropertyVariables>
-                        <onnxruntime-genai.native.path>${project.basedir}/lib</onnxruntime-genai.native.path>
+                        <onnxruntime-genai.native.path>${project.build.directory}/lib-native</onnxruntime-genai.native.path>
                     </systemPropertyVariables>
                 </configuration>
                 <executions>
