@@ -1,5 +1,2 @@
 * discorso LD_LIBRARY_PATH e capire se servono librerie specifiche per le varie architetture
 * preparazione automatizzata a test time del modello; forse un maven plugin (e/o una web app) che esponga le funzionalità dello script di onnxruntime
-* uso di Generator invece di SimpleGenAI dentro OnnxGenaiChatModel ?
-* verifica output, miglioramento struttura prompt
-* verifica significato dei parametri
