@@ -50,8 +50,7 @@ public class OnnxGenaiPromptTemplate {
      * @return A new prompt template with default formatting
      */
     public static OnnxGenaiPromptTemplate defaultTemplate() {
-        return llamaTemplate();
-        // return new OnnxGenaiPromptTemplate("System: ", "User: ", "Assistant: ", "", "", "\n");
+        return llama32Template();
     }
 
     /**
@@ -61,6 +60,21 @@ public class OnnxGenaiPromptTemplate {
      */
     public static OnnxGenaiPromptTemplate llamaTemplate() {
         return new OnnxGenaiPromptTemplate("<|system|>\n", "<|user|>\n", "<|assistant|>\n", "</s>", "</s>", "\n");
+    }
+
+    /**
+     * Creates a prompt template specifically for Llama 3.2 models.
+     *
+     * @return A new prompt template formatted for Llama 3.2 models
+     */
+    public static OnnxGenaiPromptTemplate llama32Template() {
+        return new OnnxGenaiPromptTemplate(
+                "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n",
+                "<|start_header_id|>user<|end_header_id|>\n\n",
+                "<|start_header_id|>assistant<|end_header_id|>\n\n",
+                "<|eot_id|>",
+                "<|eot_id|>",
+                "");
     }
 
     /**
