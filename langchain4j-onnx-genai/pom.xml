@@ -77,7 +77,7 @@
                 <version>3.0.0-M5</version>
                 <configuration>
                     <systemPropertyVariables>
-                        <onnxruntime-genai.native.path>${project.build.directory}/lib-native</onnxruntime-genai.native.path>
+                        <onnxruntime-genai.native.onnxruntime.path>${project.build.directory}/lib-native/libonnxruntime.so</onnxruntime-genai.native.onnxruntime.path>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -104,7 +104,6 @@
                                 <echo message="OS Name: ${os.name}, OS Arch: ${os.arch}"></echo>
 
                                 <!-- Define variables for download URLs and destination -->
-                                <property name="onnxruntime-genai.native.url" value="https://github.com/microsoft/onnxruntime-genai/releases/download/v${onnxruntime-genai.version}/onnxruntime-genai-${onnxruntime-genai.version}-linux-x64.tar.gz"></property>
                                 <property name="onnxruntime.native.url" value="https://github.com/microsoft/onnxruntime/releases/download/v${onnxruntime.version}/onnxruntime-linux-x64-${onnxruntime.version}.tgz"></property>
                                 <!-- Using the CPU version for Linux x64 -->
                                 <property name="native.libs.dir" value="${project.build.directory}/lib-native"></property>
@@ -114,18 +113,9 @@
                                 <mkdir dir="${native.libs.dir}"></mkdir>
                                 <mkdir dir="${download.dir}"></mkdir>
 
-                                <!-- Download ONNX Runtime GenAI native libraries -->
-                                <get dest="${download.dir}/onnxruntime-genai-native.tar.gz" src="${onnxruntime-genai.native.url}" usetimestamp="true" verbose="true"></get>
                                 <!-- Download ONNX Runtime native libraries (adjust URL if needed) -->
                                 <get dest="${download.dir}/onnxruntime-native.tar.gz" src="${onnxruntime.native.url}" usetimestamp="true" verbose="true"></get>
 
-                                <!-- Extract ONNX Runtime GenAI native libraries -->
-                                <untar compression="gzip" dest="${native.libs.dir}" src="${download.dir}/onnxruntime-genai-native.tar.gz">
-                                    <patternset>
-                                        <include name="onnxruntime-genai-${onnxruntime-genai.version}-linux-x64/lib/libonnxruntime-genai.so"></include>
-                                    </patternset>
-                                    <mapper type="flatten"></mapper>
-                                </untar>
                                 <!-- Extract ONNX Runtime native libraries and rename libonnxruntime.so.${onnxruntime.version} to libonnxruntime.so -->
                                 <untar compression="gzip" dest="${native.libs.dir}" src="${download.dir}/onnxruntime-native.tar.gz">
                                     <patternset>
@@ -133,9 +123,6 @@
                                     </patternset>
                                     <mapper from="onnxruntime-linux-x64-${onnxruntime.version}/lib/libonnxruntime.so.${onnxruntime.version}" to="libonnxruntime.so" type="glob"></mapper>
                                 </untar>
-
-                                <!-- Copy libonnxruntime-genai-jni.so from local lib directory -->
-                                <copy file="${project.basedir}/lib/libonnxruntime-genai-jni.so" todir="${native.libs.dir}"></copy>
                             </target>
                         </configuration>
                     </execution>
@@ -171,7 +158,7 @@
                 <version>3.0.0-M5</version>
                 <configuration>
                     <systemPropertyVariables>
-                        <onnxruntime-genai.native.path>${project.build.directory}/lib-native</onnxruntime-genai.native.path>
+                        <onnxruntime-genai.native.onnxruntime.path>${project.build.directory}/lib-native/libonnxruntime.so</onnxruntime-genai.native.onnxruntime.path>
                     </systemPropertyVariables>
                 </configuration>
                 <executions>
