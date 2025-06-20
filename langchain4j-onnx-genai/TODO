@@ -1,3 +1,1 @@
-* discorso LD_LIBRARY_PATH e capire se servono librerie specifiche per le varie architetture
-	prendere la libreria jni so (e l'altra di -genai) dal jar della dipendenza maven
 * preparazione automatizzata a test time del modello; forse un maven plugin (e/o una web app) che esponga le funzionalità dello script di onnxruntime

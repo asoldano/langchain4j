@@ -13,8 +13,8 @@
     <name>LangChain4j :: ONNX Runtime GenAI</name>
 
     <properties>
-        <onnxruntime-genai.version>0.7.1</onnxruntime-genai.version>
-        <onnxruntime.version>1.21.0</onnxruntime.version>
+        <onnxruntime-genai.version>0.9.0-SNAPSHOT</onnxruntime-genai.version>
+        <onnxruntime.version>1.22.0</onnxruntime.version>
     </properties>
 
     <dependencies>
@@ -32,7 +32,7 @@
 
         <!-- ONNX Runtime GenAI -->
         <dependency>
-            <groupId>com.microsoft.onnxruntime.genai</groupId>
+            <groupId>com.microsoft.onnxruntime</groupId>
             <artifactId>onnxruntime-genai</artifactId>
             <version>${onnxruntime-genai.version}</version>
         </dependency>
@@ -73,16 +73,6 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M5</version>
-                <configuration>
-                    <systemPropertyVariables>
-                        <onnxruntime-genai.native.onnxruntime.path>${project.build.directory}/lib-native/libonnxruntime.so</onnxruntime-genai.native.onnxruntime.path>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <dependencies>
                     <!-- Required for untar task -->
@@ -93,39 +83,6 @@
                     </dependency>
                 </dependencies>
                 <executions>
-                    <execution>
-                        <id>download-and-extract-native-libs</id>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <target>
-                                <echo message="OS Name: ${os.name}, OS Arch: ${os.arch}"></echo>
-
-                                <!-- Define variables for download URLs and destination -->
-                                <property name="onnxruntime.native.url" value="https://github.com/microsoft/onnxruntime/releases/download/v${onnxruntime.version}/onnxruntime-linux-x64-${onnxruntime.version}.tgz"></property>
-                                <!-- Using the CPU version for Linux x64 -->
-                                <property name="native.libs.dir" value="${project.build.directory}/lib-native"></property>
-                                <property name="download.dir" value="${project.build.directory}/download"></property>
-
-                                <!-- Create necessary directories -->
-                                <mkdir dir="${native.libs.dir}"></mkdir>
-                                <mkdir dir="${download.dir}"></mkdir>
-
-                                <!-- Download ONNX Runtime native libraries (adjust URL if needed) -->
-                                <get dest="${download.dir}/onnxruntime-native.tar.gz" src="${onnxruntime.native.url}" usetimestamp="true" verbose="true"></get>
-
-                                <!-- Extract ONNX Runtime native libraries and rename libonnxruntime.so.${onnxruntime.version} to libonnxruntime.so -->
-                                <untar compression="gzip" dest="${native.libs.dir}" src="${download.dir}/onnxruntime-native.tar.gz">
-                                    <patternset>
-                                        <include name="onnxruntime-linux-x64-${onnxruntime.version}/lib/libonnxruntime.so.${onnxruntime.version}"></include>
-                                    </patternset>
-                                    <mapper from="onnxruntime-linux-x64-${onnxruntime.version}/lib/libonnxruntime.so.${onnxruntime.version}" to="libonnxruntime.so" type="glob"></mapper>
-                                </untar>
-                            </target>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>download-test-model</id>
                         <goals>
@@ -149,24 +106,6 @@
                                  -->
                             </target>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.0.0-M5</version>
-                <configuration>
-                    <systemPropertyVariables>
-                        <onnxruntime-genai.native.onnxruntime.path>${project.build.directory}/lib-native/libonnxruntime.so</onnxruntime-genai.native.onnxruntime.path>
-                    </systemPropertyVariables>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
