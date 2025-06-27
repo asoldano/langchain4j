@@ -69,46 +69,4 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <dependencies>
-                    <!-- Required for untar task -->
-                    <dependency>
-                        <groupId>org.apache.ant</groupId>
-                        <artifactId>ant-compress</artifactId>
-                        <version>1.5</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <execution>
-                        <id>download-test-model</id>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <phase>process-test-resources</phase>
-                        <configuration>
-                            <target>
-                                <!-- Create directories
-                                <mkdir dir="${project.build.directory}/test-models/SmolLM_135M_int4"></mkdir>
-                                 -->
-
-                                <!-- Download model files
-                                <get dest="${project.build.directory}/test-models/tiny-llama-onnx/model.onnx" src="https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct/resolve/main/onnx/model_q4f16.onnx" usetimestamp="true" verbose="true"></get>
-
-                                <get dest="${project.build.directory}/test-models/tiny-llama-onnx/genai_config.json" src="https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct/resolve/main/config.json" usetimestamp="true" verbose="true"></get>
-
-                                <get dest="${project.build.directory}/test-models/tiny-llama-onnx/tokenizer/tokenizer.json" src="https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct/resolve/main/tokenizer.json" usetimestamp="true" verbose="true"></get>
-
-                                <get dest="${project.build.directory}/test-models/tiny-llama-onnx/tokenizer/tokenizer_config.json" src="https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct/resolve/main/tokenizer_config.json" usetimestamp="true" verbose="true"></get>
-                                 -->
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>
